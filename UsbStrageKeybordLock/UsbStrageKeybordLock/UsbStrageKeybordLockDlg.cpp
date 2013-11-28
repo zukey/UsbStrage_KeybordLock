@@ -66,7 +66,7 @@ BOOL CUsbStrageKeybordLockDlg::OnInitDialog()
 
 	// 初期表示更新
 	UpdateKeybordLockState();
-
+	UpdateUsbLockState();
 
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。
 }
@@ -142,14 +142,16 @@ void CUsbStrageKeybordLockDlg::OnBnClickedBtnKeyUnlock()
 void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbLock()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
-	UpdateUsbLockState(true);
+	mUsbDisabler.DisablePresentDevice();
+	UpdateUsbLockState();
 }
 
 
 void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbUnlock()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
-	UpdateUsbLockState(false);
+	mUsbDisabler.ResetDisabledDevice();
+	UpdateUsbLockState();
 }
 
 
@@ -179,8 +181,16 @@ HBRUSH CUsbStrageKeybordLockDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor
 		break;
 
 	case IDC_STATIC_USB:
-		color = this->mColorGreen;
-		brush = &this->mBrushGreen;
+		if (this->mUsbDisabler.HasDisabledItem())
+		{
+			color = this->mColorRed;
+			brush = &this->mBrushRed;
+		}
+		else
+		{
+			color = this->mColorGreen;
+			brush = &this->mBrushGreen;
+		}
 		break;
 
 	default:
@@ -194,12 +204,12 @@ HBRUSH CUsbStrageKeybordLockDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor
 
 void CUsbStrageKeybordLockDlg::UpdateKeybordLockState()
 {
-	UpdateLockState(IDC_STATIC_KEY ,this->mKeyDisabler.IsDisabled());
+	UpdateLockState(IDC_STATIC_KEY, this->mKeyDisabler.IsDisabled());
 }
 
-void CUsbStrageKeybordLockDlg::UpdateUsbLockState(bool locked)
+void CUsbStrageKeybordLockDlg::UpdateUsbLockState()
 {
-	UpdateLockState(IDC_STATIC_USB,locked);
+	UpdateLockState(IDC_STATIC_USB, this->mUsbDisabler.HasDisabledItem());
 }
 
 void CUsbStrageKeybordLockDlg::UpdateLockState(int targetControlId, bool locked)

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../KeyboardDisabler/KeyboardDisabler.h"
+#include "../UsbStrageDisabler/UsbStrageDisabler.h"
 
 
 // CUsbStrageKeybordLockDlg ダイアログ
@@ -46,9 +47,10 @@ private:
 	CBrush		mBrushGreen;
 	CBrush		mBrushRed;
 	CKeyboardDisabler	mKeyDisabler;
+	CUsbStrageDisabler	mUsbDisabler;
 
 	void UpdateKeybordLockState();
-	void UpdateUsbLockState(bool locked);
+	void UpdateUsbLockState();
 	void UpdateLockState(int targetControlId, bool locked);
 	
 public:
