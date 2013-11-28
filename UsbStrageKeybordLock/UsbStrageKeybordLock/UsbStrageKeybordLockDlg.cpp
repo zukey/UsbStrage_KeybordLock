@@ -31,6 +31,13 @@ void CUsbStrageKeybordLockDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CUsbStrageKeybordLockDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDOK, &CUsbStrageKeybordLockDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, &CUsbStrageKeybordLockDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDC_BTN_KEY_LOCK, &CUsbStrageKeybordLockDlg::OnBnClickedBtnKeyLock)
+	ON_BN_CLICKED(IDC_BTN_KEY_UNLOCK, &CUsbStrageKeybordLockDlg::OnBnClickedBtnKeyUnlock)
+	ON_BN_CLICKED(IDC_BTN_USB_LOCK, &CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbLock)
+	ON_BN_CLICKED(IDC_BTN_USB_UNLOCK, &CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbUnlock)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -46,6 +53,20 @@ BOOL CUsbStrageKeybordLockDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 小さいアイコンの設定
 
 	// TODO: 初期化をここに追加します。
+
+	// 色作成
+	mColorWhite = RGB(255,255,255);
+	mColorGreen = RGB(0,255,0);
+	mColorRed = RGB(255,0,0);
+
+	// スタティックコントロール背景色設定用のブラシ
+	mBrushWhite.CreateSolidBrush(mColorWhite);
+	mBrushGreen.CreateSolidBrush(mColorGreen);
+	mBrushRed.CreateSolidBrush(mColorRed);
+
+	// 初期表示更新
+	UpdateKeybordLockState();
+
 
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。
 }
@@ -84,5 +105,110 @@ void CUsbStrageKeybordLockDlg::OnPaint()
 HCURSOR CUsbStrageKeybordLockDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
+}
+
+
+
+void CUsbStrageKeybordLockDlg::OnBnClickedOk()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	CDialogEx::OnOK();
+}
+
+
+void CUsbStrageKeybordLockDlg::OnBnClickedCancel()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	CDialogEx::OnCancel();
+}
+
+
+void CUsbStrageKeybordLockDlg::OnBnClickedBtnKeyLock()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	mKeyDisabler.Start();
+	UpdateKeybordLockState();
+}
+
+
+void CUsbStrageKeybordLockDlg::OnBnClickedBtnKeyUnlock()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	mKeyDisabler.End();
+	UpdateKeybordLockState();
+}
+
+
+void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbLock()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	UpdateUsbLockState(true);
+}
+
+
+void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbUnlock()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	UpdateUsbLockState(false);
+}
+
+
+HBRUSH CUsbStrageKeybordLockDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  ここで DC の属性を変更してください。
+	if (nCtlColor != CTLCOLOR_STATIC) { return hbr; }
+
+	int id =pWnd->GetDlgCtrlID();
+	COLORREF color = this->mColorWhite;;
+	CBrush* brush = &this->mBrushWhite;
+	switch (id)
+	{
+	case IDC_STATIC_KEY:
+		if (mKeyDisabler.IsDisabled())
+		{
+			color = this->mColorRed;
+			brush = &this->mBrushRed;
+		}
+		else
+		{
+			color = this->mColorGreen;
+			brush = &this->mBrushGreen;
+		}
+		break;
+
+	case IDC_STATIC_USB:
+		color = this->mColorGreen;
+		brush = &this->mBrushGreen;
+		break;
+
+	default:
+		return hbr;
+	}
+
+	// TODO:  既定値を使用したくない場合は別のブラシを返します。
+	pDC->SetBkColor(color);
+	return (HBRUSH)*brush;
+}
+
+void CUsbStrageKeybordLockDlg::UpdateKeybordLockState()
+{
+	UpdateLockState(IDC_STATIC_KEY ,this->mKeyDisabler.IsDisabled());
+}
+
+void CUsbStrageKeybordLockDlg::UpdateUsbLockState(bool locked)
+{
+	UpdateLockState(IDC_STATIC_USB,locked);
+}
+
+void CUsbStrageKeybordLockDlg::UpdateLockState(int targetControlId, bool locked)
+{
+	TCHAR* text = _T("非ロック中");
+	if (locked)
+	{
+		text = _T("ロック中");
+	}
+	this->SetDlgItemTextW(targetControlId ,text);
 }
 

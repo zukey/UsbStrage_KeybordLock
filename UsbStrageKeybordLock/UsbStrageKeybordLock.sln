@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UsbStrageKeybordLock", "UsbStrageKeybordLock\UsbStrageKeybordLock.vcxproj", "{0B4149B8-90D6-4745-AB71-B4EE460D5A2D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KeyboardDisabler", "KeyboardDisabler\KeyboardDisabler.vcxproj", "{119D537F-1A94-4234-A70A-5CC4794042C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{46B20865-C002-4C1E-9543-A32A8D6CF29C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,8 +17,15 @@ Global
 		{0B4149B8-90D6-4745-AB71-B4EE460D5A2D}.Debug|Win32.Build.0 = Debug|Win32
 		{0B4149B8-90D6-4745-AB71-B4EE460D5A2D}.Release|Win32.ActiveCfg = Release|Win32
 		{0B4149B8-90D6-4745-AB71-B4EE460D5A2D}.Release|Win32.Build.0 = Release|Win32
+		{119D537F-1A94-4234-A70A-5CC4794042C5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{119D537F-1A94-4234-A70A-5CC4794042C5}.Debug|Win32.Build.0 = Debug|Win32
+		{119D537F-1A94-4234-A70A-5CC4794042C5}.Release|Win32.ActiveCfg = Release|Win32
+		{119D537F-1A94-4234-A70A-5CC4794042C5}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{119D537F-1A94-4234-A70A-5CC4794042C5} = {46B20865-C002-4C1E-9543-A32A8D6CF29C}
 	EndGlobalSection
 EndGlobal

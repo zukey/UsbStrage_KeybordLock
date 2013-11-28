@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "../KeyboardDisabler/KeyboardDisabler.h"
+
 
 // CUsbStrageKeybordLockDlg ダイアログ
 class CUsbStrageKeybordLockDlg : public CDialogEx
@@ -28,4 +30,27 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedBtnKeyLock();
+	afx_msg void OnBnClickedBtnKeyUnlock();
+	afx_msg void OnBnClickedBtnUsbLock();
+	afx_msg void OnBnClickedBtnUsbUnlock();
+
+private:
+	COLORREF	mColorWhite;
+	COLORREF	mColorGreen;
+	COLORREF	mColorRed;
+	CBrush		mBrushWhite;
+	CBrush		mBrushGreen;
+	CBrush		mBrushRed;
+	CKeyboardDisabler	mKeyDisabler;
+
+	void UpdateKeybordLockState();
+	void UpdateUsbLockState(bool locked);
+	void UpdateLockState(int targetControlId, bool locked);
+	
+public:
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
