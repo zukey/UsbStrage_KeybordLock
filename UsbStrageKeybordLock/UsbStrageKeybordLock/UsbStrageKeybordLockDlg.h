@@ -52,7 +52,7 @@ private:
 	void UpdateKeybordLockState();
 	void UpdateUsbLockState();
 	void UpdateLockState(int targetControlId, bool locked);
-	
+	void UpdateUsbControls(bool needReboot);
 public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };

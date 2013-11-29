@@ -23,25 +23,23 @@ public:
 	~CUsbStrageDisabler(void);
 
 	// 指定されたデバイスを無効化します。
-	bool DisableDevice(GUID target);
+	bool DisableDevice(GUID target, bool* needReboot);
 
 	// 現在接続されているUSBストレージデバイスを無効化します。
-	bool DisablePresentDevice();
+	bool DisablePresentDevice(bool* needReboot);
 
 	// このインスタンスが無効化したデバイスをリセット(有効化)します。
-	void ResetDisabledDevice();
+	void ResetDisabledDevice(bool* needReboot);
 
 	bool HasDisabledItem();
 
 private:
 	void* _guidList;
 	bool IsUsbStrage(HDEVINFO devInfo, SP_DEVINFO_DATA& devData);
-	bool DisableDevice(GUID* target);
+	bool DisableDevice(GUID* target, bool* needReboot);
 	bool DisableDevice(HDEVINFO devInfo, SP_DEVINFO_DATA& devData);
-	bool EnableDevice(GUID target);
+	bool EnableDevice(GUID& target, bool* needReboot);
 	void AddDisabledList(GUID& target);
+	bool NeedReboot(HDEVINFO devInfo, SP_DEVINFO_DATA& devData);
 };
 
-extern USBSTRAGEDISABLER_API int nUsbStrageDisabler;
-
-USBSTRAGEDISABLER_API int fnUsbStrageDisabler(void);

@@ -26,7 +26,7 @@ CUsbStrageDisabler::CUsbStrageDisabler()
 CUsbStrageDisabler::~CUsbStrageDisabler(void)
 {
 	OutputDebugString(TEXT("UsbInvalider Destructor\n"));
-	ResetDisabledDevice();
+	ResetDisabledDevice(NULL);
 
 	// void*のままだとリークするので適切な型にキャストしとく
 	vector<GUID>* guidList = (vector<GUID>*)_guidList;
@@ -35,20 +35,22 @@ CUsbStrageDisabler::~CUsbStrageDisabler(void)
 }
 
 // 指定されたUSBストレージデバイスを無効化します。
-bool CUsbStrageDisabler::DisableDevice(GUID target)
+bool CUsbStrageDisabler::DisableDevice(GUID target, bool* needReboot)
 {
-	return DisableDevice(&target);
+	return DisableDevice(&target, needReboot);
 }
 
 // 現在接続されているUSBストレージデバイスを無効化します。
-bool CUsbStrageDisabler::DisablePresentDevice()
+bool CUsbStrageDisabler::DisablePresentDevice(bool* needReboot)
 {
-	return DisableDevice(NULL);
+	return DisableDevice(NULL, needReboot);
 }
 
 // このインスタンスが無効化したデバイスをリセット(有効化)します。
-void CUsbStrageDisabler::ResetDisabledDevice()
+void CUsbStrageDisabler::ResetDisabledDevice(bool* needReboot)
 {
+	if (needReboot != NULL) { *needReboot = false; }
+
 	vector<GUID>* guidList = (vector<GUID>*)_guidList;
 	if (guidList->empty()) { return; }
 
@@ -58,9 +60,14 @@ void CUsbStrageDisabler::ResetDisabledDevice()
 		GUID guid = guidList->at(i);
 
 		// 有効にする
-		EnableDevice(guid);
+		bool needrb;
+		EnableDevice(guid, &needrb);
 
-		// リブートが必要かを判定
+		// リブート要否フラグ更新
+		if (needReboot != NULL)
+		{
+			if (needrb) { *needReboot = true; }
+		}
 	}
 }
 
@@ -91,8 +98,13 @@ bool CUsbStrageDisabler::IsUsbStrage(HDEVINFO devInfo, SP_DEVINFO_DATA& devData)
 	return false;
 }
 
-bool CUsbStrageDisabler::DisableDevice(GUID* target)
+/// <summary></summary>
+/// <param name="target">ターゲットとなるGUIDを指定します。現在接続されている全てのデバイスを対象とする場合はNULLを指定します。</param>
+/// <returns>操作した結果、再起動が必要となる場合はtrueを返します。</returns>
+bool CUsbStrageDisabler::DisableDevice(GUID* target, bool* needReboot)
 {
+	if (needReboot != NULL) { *needReboot = false; }
+
 	// 列挙
 	HDEVINFO devInfo = SetupDiGetClassDevsEx(target, TEXT("USB"), NULL, DIGCF_PRESENT, NULL, NULL, NULL);
 	if (devInfo == 0) { return false; }
@@ -114,7 +126,11 @@ bool CUsbStrageDisabler::DisableDevice(GUID* target)
 		// 無効化したGUIDをリストに追加
 		AddDisabledList(devData.ClassGuid);
 
-		// リブートが必要かを判定
+		if (needReboot != NULL)
+		{
+			// リブートが必要かを判定
+			if (NeedReboot(devInfo, devData)) { *needReboot = true; }
+		}
 	}
 
 	// リソース開放
@@ -144,9 +160,11 @@ bool CUsbStrageDisabler::DisableDevice(HDEVINFO devInfo, SP_DEVINFO_DATA& devDat
 	return true;
 }
 
-bool CUsbStrageDisabler::EnableDevice(GUID target)
+bool CUsbStrageDisabler::EnableDevice(GUID& target, bool* needReboot)
 {
-	HDEVINFO devInfo = SetupDiGetClassDevsEx(&target, L"USB", NULL, DIGCF_PRESENT, NULL, NULL, NULL);
+	if (needReboot != NULL) { *needReboot = false; }
+
+	HDEVINFO devInfo = SetupDiGetClassDevsEx(&target, TEXT("USB"), NULL, DIGCF_PRESENT, NULL, NULL, NULL);
 	if (devInfo == 0) { return false; }
 
 	SP_DEVINFO_DATA devData;
@@ -179,6 +197,12 @@ bool CUsbStrageDisabler::EnableDevice(GUID target)
 		{
 			return false;
 		}
+
+		if (needReboot != NULL)
+		{
+			// リブートが必要か判定
+			if (NeedReboot(devInfo, devData)) { *needReboot = true; }
+		}
 	}
 
 	return true;
@@ -198,3 +222,19 @@ void CUsbStrageDisabler::AddDisabledList(GUID& target)
 	guidList->push_back(target);
 }
 
+/// <summary>指定されたデバイスが再起動を要求するかを判定します。</summary>
+/// <param name="devInfo">デバイス情報セット</param>
+/// <param name="devData">デバイス情報</param>
+/// <returns>再起動が必要な場合はtrueを返します。</returns>
+bool CUsbStrageDisabler::NeedReboot(HDEVINFO devInfo, SP_DEVINFO_DATA& devData)
+{
+    SP_DEVINSTALL_PARAMS devParams;
+    devParams.cbSize = sizeof(devParams);
+
+	if (!SetupDiGetDeviceInstallParams(devInfo, &devData, &devParams))
+	{
+		return false;
+	}
+
+	return ((devParams.Flags & (DI_NEEDRESTART|DI_NEEDREBOOT)) != 0);
+}

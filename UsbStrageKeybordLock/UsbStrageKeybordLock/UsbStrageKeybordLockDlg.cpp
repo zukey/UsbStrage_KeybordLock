@@ -142,16 +142,18 @@ void CUsbStrageKeybordLockDlg::OnBnClickedBtnKeyUnlock()
 void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbLock()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
-	mUsbDisabler.DisablePresentDevice();
-	UpdateUsbLockState();
+	bool needReboot;
+	mUsbDisabler.DisablePresentDevice(&needReboot);
+	UpdateUsbControls(needReboot);
 }
 
 
 void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbUnlock()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
-	mUsbDisabler.ResetDisabledDevice();
-	UpdateUsbLockState();
+	bool needReboot;
+	mUsbDisabler.ResetDisabledDevice(&needReboot);
+	UpdateUsbControls(needReboot);
 }
 
 
@@ -220,5 +222,15 @@ void CUsbStrageKeybordLockDlg::UpdateLockState(int targetControlId, bool locked)
 		text = _T("ロック中");
 	}
 	this->SetDlgItemTextW(targetControlId ,text);
+}
+
+void CUsbStrageKeybordLockDlg::UpdateUsbControls(bool needReboot)
+{
+	if (needReboot)
+	{
+		CWnd* pLabel = this->GetDlgItem(IDC_STATIC_NEEDRB);
+		pLabel->ShowWindow(SW_SHOW);
+	}
+	UpdateUsbLockState();
 }
 
