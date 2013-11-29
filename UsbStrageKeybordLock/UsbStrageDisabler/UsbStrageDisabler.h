@@ -10,6 +10,7 @@
 #define USBSTRAGEDISABLER_API __declspec(dllimport)
 #endif
 
+#include <tchar.h>
 extern "C"
 {
 #include <SetupAPI.h>
@@ -35,11 +36,15 @@ public:
 
 private:
 	void* _guidList;
-	bool IsUsbStrage(HDEVINFO devInfo, SP_DEVINFO_DATA& devData);
+	void* _disableTargetGUIDs;
+	bool IsUsbStrage(HDEVINFO devInfo, SP_DEVINFO_DATA* devData);
 	bool DisableDevice(GUID* target, bool* needReboot);
 	bool DisableDevice(HDEVINFO devInfo, SP_DEVINFO_DATA& devData);
 	bool EnableDevice(GUID& target, bool* needReboot);
 	void AddDisabledList(GUID& target);
 	bool NeedReboot(HDEVINFO devInfo, SP_DEVINFO_DATA& devData);
+	void AddDisableTargetGUID(const TCHAR* className);
+	GUID ConvertClassNameToGUID(const TCHAR* className);
+	bool MutchDisableTarget(GUID& guid);
 };
 

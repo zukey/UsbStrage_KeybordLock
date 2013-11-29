@@ -221,7 +221,7 @@ void CUsbStrageKeybordLockDlg::UpdateLockState(int targetControlId, bool locked)
 	{
 		text = _T("ƒƒbƒN’†");
 	}
-	this->SetDlgItemTextW(targetControlId ,text);
+	this->SetDlgItemTextA(targetControlId ,text);
 }
 
 void CUsbStrageKeybordLockDlg::UpdateUsbControls(bool needReboot)

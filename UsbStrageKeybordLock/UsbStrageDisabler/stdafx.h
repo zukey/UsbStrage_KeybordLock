@@ -15,3 +15,5 @@
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください。
 #include <vector>
+#include <stdio.h>
+#include <tchar.h>
