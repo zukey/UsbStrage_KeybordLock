@@ -92,6 +92,12 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)\*.exe $(SolutionDir)\bin\
+copy $(OutDir)\*.dll $(SolutionDir)\bin\
+copy $(OutDir)\*.lib $(SolutionDir)\bin\
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
