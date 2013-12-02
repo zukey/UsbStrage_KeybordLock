@@ -15,6 +15,9 @@
 
 using namespace std;
 
+void DebugTrace(const TCHAR* format, ...);
+
+
 // これは、エクスポートされたクラスのコンストラクターです。
 // クラス定義に関しては UsbStrageDisabler.h を参照してください。
 CUsbStrageDisabler::CUsbStrageDisabler()
@@ -182,10 +185,10 @@ bool CUsbStrageDisabler::DisableDevice(HDEVINFO devInfo, SP_DEVINFO_DATA& devDat
 	if (!SetupDiSetClassInstallParams(devInfo, &devData, &param.ClassInstallHeader, sizeof(param))
 		|| !SetupDiChangeState(devInfo, &devData))
 	{
-		//TRACE(_T("DisableDevice : RegistFailed Error[%d]\n"), GetLastError());
+		DebugTrace(_T("DisableDevice : RegistFailed Error[%d]\n"), GetLastError());
 		return false;
 	}
-	//TRACE(_T("DisableDevice : Regist Success \n"));
+	DebugTrace(_T("DisableDevice : Regist Success \n"));
 
 	return true;
 }
@@ -215,8 +218,18 @@ bool CUsbStrageDisabler::EnableDevice(GUID& target, bool* needReboot)
 		if (!SetupDiSetClassInstallParams(devInfo, &devData, &param.ClassInstallHeader, sizeof(param))
 			|| !SetupDiChangeState(devInfo, &devData))
 		{
+			DebugTrace(TEXT("DICS_ENABLE Error[%d]"), GetLastError());
 			return false;
 		}
+
+		//param.Scope = DICS_FLAG_CONFIGSPECIFIC;
+		//param.HwProfile = 0;
+
+		//if (!SetupDiSetClassInstallParams(devInfo, &devData, &param.ClassInstallHeader, sizeof(param))
+		//	|| !SetupDiChangeState(devInfo, &devData))
+		//{
+		//	return false;
+		//}
 
 		if (needReboot != NULL)
 		{
@@ -328,3 +341,20 @@ bool CUsbStrageDisabler::MutchDisableTarget(GUID& guid)
 	}
 	return false;
 }
+
+void DebugTrace(const TCHAR* format, ...)
+{
+#ifdef _DEBUG
+	va_list args;
+	TCHAR	buff[2048];
+	memset(buff, 0, sizeof(buff));
+
+	va_start(args, format);
+
+	_vstprintf_s(buff, sizeof(buff), format, args);
+	OutputDebugString(buff);
+
+	va_end(args);
+#endif
+}
+

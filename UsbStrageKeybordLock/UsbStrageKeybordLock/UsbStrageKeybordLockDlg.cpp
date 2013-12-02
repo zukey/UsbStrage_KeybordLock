@@ -6,6 +6,8 @@
 #include "UsbStrageKeybordLock.h"
 #include "UsbStrageKeybordLockDlg.h"
 #include "afxdialogex.h"
+#include <Dbt.h>
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -38,6 +40,7 @@ BEGIN_MESSAGE_MAP(CUsbStrageKeybordLockDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_USB_LOCK, &CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbLock)
 	ON_BN_CLICKED(IDC_BTN_USB_UNLOCK, &CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbUnlock)
 	ON_WM_CTLCOLOR()
+	ON_WM_DEVMODECHANGE()
 END_MESSAGE_MAP()
 
 
@@ -234,3 +237,43 @@ void CUsbStrageKeybordLockDlg::UpdateUsbControls(bool needReboot)
 	UpdateUsbLockState();
 }
 
+
+
+LRESULT CUsbStrageKeybordLockDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	// TODO: ここに特定なコードを追加するか、もしくは基本クラスを呼び出してください。
+	if (message == WM_DEVICECHANGE)
+	{
+		//FuncDeviceChangeMessage(wParam, lParam);
+	}
+
+	return CDialogEx::WindowProc(message, wParam, lParam);
+}
+
+void CUsbStrageKeybordLockDlg::FuncDeviceChangeMessage(WPARAM wp, LPARAM lp)
+{
+	if (wp != DBT_DEVICEARRIVAL) { return; }
+
+	DEV_BROADCAST_HDR* hdr = (DEV_BROADCAST_HDR*)lp;
+	if (hdr->dbch_devicetype != DBT_DEVTYP_VOLUME) { return; }
+
+	DEV_BROADCAST_VOLUME* volInfo = (DEV_BROADCAST_VOLUME*)lp;
+	if ((volInfo->dbcv_flags & DBTF_MEDIA) == 0) { return; }
+
+	bool needRestart;
+//	this->mUsbDisabler.DisableDevice(devif->dbcc_classguid, &needRestart);
+	this->mUsbDisabler.DisablePresentDevice(&needRestart);
+	this->UpdateUsbControls(needRestart);
+}
+
+
+void CUsbStrageKeybordLockDlg::OnDevModeChange(LPTSTR lpDeviceName)
+{
+	CDialogEx::OnDevModeChange(lpDeviceName);
+
+	// TODO: ここにメッセージ ハンドラー コードを追加します。
+	bool needRestart;
+//	this->mUsbDisabler.DisableDevice(devif->dbcc_classguid, &needRestart);
+	this->mUsbDisabler.DisablePresentDevice(&needRestart);
+	this->UpdateUsbControls(needRestart);
+}

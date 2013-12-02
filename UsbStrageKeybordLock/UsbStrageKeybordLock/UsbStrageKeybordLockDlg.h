@@ -53,6 +53,10 @@ private:
 	void UpdateUsbLockState();
 	void UpdateLockState(int targetControlId, bool locked);
 	void UpdateUsbControls(bool needReboot);
+	void FuncDeviceChangeMessage(WPARAM wp, LPARAM lp);
+	
 public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	afx_msg void OnDevModeChange(LPTSTR lpDeviceName);
 };

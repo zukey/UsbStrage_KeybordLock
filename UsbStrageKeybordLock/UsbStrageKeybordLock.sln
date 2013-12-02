@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{46B20865-C00
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UsbStrageDisabler", "UsbStrageDisabler\UsbStrageDisabler.vcxproj", "{9578D63E-89B0-4A62-8B3B-793D760A0C24}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{4F873065-352E-46BA-8B20-4FCAAC1BDE90}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UsbStrageLock", "UsbStrageLock\UsbStrageLock.vcxproj", "{9BAD102E-F7DA-40DE-8469-50749553CDAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -27,6 +31,10 @@ Global
 		{9578D63E-89B0-4A62-8B3B-793D760A0C24}.Debug|Win32.Build.0 = Debug|Win32
 		{9578D63E-89B0-4A62-8B3B-793D760A0C24}.Release|Win32.ActiveCfg = Release|Win32
 		{9578D63E-89B0-4A62-8B3B-793D760A0C24}.Release|Win32.Build.0 = Release|Win32
+		{9BAD102E-F7DA-40DE-8469-50749553CDAA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9BAD102E-F7DA-40DE-8469-50749553CDAA}.Debug|Win32.Build.0 = Debug|Win32
+		{9BAD102E-F7DA-40DE-8469-50749553CDAA}.Release|Win32.ActiveCfg = Release|Win32
+		{9BAD102E-F7DA-40DE-8469-50749553CDAA}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -34,5 +42,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{119D537F-1A94-4234-A70A-5CC4794042C5} = {46B20865-C002-4C1E-9543-A32A8D6CF29C}
 		{9578D63E-89B0-4A62-8B3B-793D760A0C24} = {46B20865-C002-4C1E-9543-A32A8D6CF29C}
+		{9BAD102E-F7DA-40DE-8469-50749553CDAA} = {4F873065-352E-46BA-8B20-4FCAAC1BDE90}
 	EndGlobalSection
 EndGlobal
