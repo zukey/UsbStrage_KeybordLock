@@ -38,7 +38,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		case 2:
 			FuncResetDisabledDevice(disabler);
 			break;
-
 		case 9:
 			loop = false;
 			break;
@@ -68,4 +67,3 @@ void FuncResetDisabledDevice(CUsbStrageDisabler& disabler)
 	cout << "Call DisablePresentDevice" << endl;
 	cout << "\tNeedRestart[" << needRestart << "]" << endl;
 }
-

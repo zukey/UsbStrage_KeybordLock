@@ -18,3 +18,4 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <stdarg.h>
+#include <WinBase.h>

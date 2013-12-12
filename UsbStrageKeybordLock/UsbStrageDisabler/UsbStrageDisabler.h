@@ -42,6 +42,7 @@ private:
 	bool DisableDevice(HDEVINFO devInfo, SP_DEVINFO_DATA& devData);
 	bool EnableDevice(GUID& target, bool* needReboot);
 	void AddDisabledList(GUID& target);
+	void RemoveDisabledList(GUID& target);
 	bool NeedReboot(HDEVINFO devInfo, SP_DEVINFO_DATA& devData);
 	void AddDisableTargetGUID(const TCHAR* className);
 	GUID ConvertClassNameToGUID(const TCHAR* className);

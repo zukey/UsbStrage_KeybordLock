@@ -78,7 +78,10 @@ void CUsbStrageDisabler::ResetDisabledDevice(bool* needReboot)
 
 		// 有効にする
 		bool needrb;
-		EnableDevice(guid, &needrb);
+		if (EnableDevice(guid, &needrb))
+		{
+			RemoveDisabledList(guid);
+		}
 
 		// リブート要否フラグ更新
 		if (needReboot != NULL)
@@ -95,7 +98,6 @@ bool CUsbStrageDisabler::HasDisabledItem()
 
 	return guidList->size() > 0;
 }
-
 
 bool CUsbStrageDisabler::IsUsbStrage(HDEVINFO devInfo, SP_DEVINFO_DATA* devData)
 {
@@ -222,14 +224,15 @@ bool CUsbStrageDisabler::EnableDevice(GUID& target, bool* needReboot)
 			return false;
 		}
 
-		//param.Scope = DICS_FLAG_CONFIGSPECIFIC;
-		//param.HwProfile = 0;
+		// ConfigSpecificスコープでも登録する
+		param.Scope = DICS_FLAG_CONFIGSPECIFIC;
+		param.HwProfile = 0;
 
-		//if (!SetupDiSetClassInstallParams(devInfo, &devData, &param.ClassInstallHeader, sizeof(param))
-		//	|| !SetupDiChangeState(devInfo, &devData))
-		//{
-		//	return false;
-		//}
+		if (!SetupDiSetClassInstallParams(devInfo, &devData, &param.ClassInstallHeader, sizeof(param))
+			|| !SetupDiChangeState(devInfo, &devData))
+		{
+			return false;
+		}
 
 		if (needReboot != NULL)
 		{
@@ -253,6 +256,21 @@ void CUsbStrageDisabler::AddDisabledList(GUID& target)
 	}
 
 	guidList->push_back(target);
+}
+
+void CUsbStrageDisabler::RemoveDisabledList(GUID& target)
+{
+	vector<GUID>* guidList = (vector<GUID>*)_guidList;
+
+	vector<GUID>::iterator it = guidList->begin();
+	while(it != guidList->end())
+	{
+		if (*it != target) { it++; continue; }
+
+		// 対象を削除
+		it = guidList->erase(it);
+	}
+
 }
 
 /// <summary>指定されたデバイスが再起動を要求するかを判定します。</summary>

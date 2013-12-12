@@ -40,7 +40,7 @@ BEGIN_MESSAGE_MAP(CUsbStrageKeybordLockDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_USB_LOCK, &CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbLock)
 	ON_BN_CLICKED(IDC_BTN_USB_UNLOCK, &CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbUnlock)
 	ON_WM_CTLCOLOR()
-	ON_WM_DEVMODECHANGE()
+//	ON_WM_DEVMODECHANGE()
 END_MESSAGE_MAP()
 
 
@@ -56,6 +56,7 @@ BOOL CUsbStrageKeybordLockDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 小さいアイコンの設定
 
 	// TODO: 初期化をここに追加します。
+	this->mUsbLocking = false;
 
 	// 色作成
 	mColorWhite = RGB(255,255,255);
@@ -145,6 +146,7 @@ void CUsbStrageKeybordLockDlg::OnBnClickedBtnKeyUnlock()
 void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbLock()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	this->mUsbLocking = true;
 	bool needReboot;
 	mUsbDisabler.DisablePresentDevice(&needReboot);
 	UpdateUsbControls(needReboot);
@@ -154,6 +156,7 @@ void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbLock()
 void CUsbStrageKeybordLockDlg::OnBnClickedBtnUsbUnlock()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	this->mUsbLocking = false;
 	bool needReboot;
 	mUsbDisabler.ResetDisabledDevice(&needReboot);
 	UpdateUsbControls(needReboot);
@@ -168,33 +171,29 @@ HBRUSH CUsbStrageKeybordLockDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor
 	if (nCtlColor != CTLCOLOR_STATIC) { return hbr; }
 
 	int id =pWnd->GetDlgCtrlID();
-	COLORREF color = this->mColorWhite;;
+	COLORREF color = this->mColorWhite;
 	CBrush* brush = &this->mBrushWhite;
+	bool showRed = false;
 	switch (id)
 	{
 	case IDC_STATIC_KEY:
 		if (mKeyDisabler.IsDisabled())
 		{
-			color = this->mColorRed;
-			brush = &this->mBrushRed;
-		}
-		else
-		{
-			color = this->mColorGreen;
-			brush = &this->mBrushGreen;
+			showRed = true;
 		}
 		break;
 
 	case IDC_STATIC_USB:
+		if (this->mUsbLocking)
+		{
+			showRed = true;
+		}
+		break;
+
+	case IDC_STATIC_USB_HASLOCK:
 		if (this->mUsbDisabler.HasDisabledItem())
 		{
-			color = this->mColorRed;
-			brush = &this->mBrushRed;
-		}
-		else
-		{
-			color = this->mColorGreen;
-			brush = &this->mBrushGreen;
+			showRed = true;
 		}
 		break;
 
@@ -203,6 +202,16 @@ HBRUSH CUsbStrageKeybordLockDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor
 	}
 
 	// TODO:  既定値を使用したくない場合は別のブラシを返します。
+	if (showRed)
+	{
+		color = this->mColorRed;
+		brush = &this->mBrushRed;
+	}
+	else
+	{
+		color = this->mColorGreen;
+		brush = &this->mBrushGreen;
+	}
 	pDC->SetBkColor(color);
 	return (HBRUSH)*brush;
 }
@@ -214,7 +223,8 @@ void CUsbStrageKeybordLockDlg::UpdateKeybordLockState()
 
 void CUsbStrageKeybordLockDlg::UpdateUsbLockState()
 {
-	UpdateLockState(IDC_STATIC_USB, this->mUsbDisabler.HasDisabledItem());
+	UpdateLockState(IDC_STATIC_USB, this->mUsbLocking);
+	UpdateUsbHasLockState();
 }
 
 void CUsbStrageKeybordLockDlg::UpdateLockState(int targetControlId, bool locked)
@@ -222,9 +232,19 @@ void CUsbStrageKeybordLockDlg::UpdateLockState(int targetControlId, bool locked)
 	TCHAR* text = _T("非ロック中");
 	if (locked)
 	{
-		text = _T("ロック中");
+		text = _T("ロック制御中");
 	}
 	this->SetDlgItemTextA(targetControlId ,text);
+}
+
+void CUsbStrageKeybordLockDlg::UpdateUsbHasLockState()
+{
+	TCHAR* text = _T("ロック中デバイス無し");
+	if (this->mUsbDisabler.HasDisabledItem())
+	{
+		text = _T("ロック中デバイス有り");
+	}
+	this->SetDlgItemTextA(IDC_STATIC_USB_HASLOCK ,text);
 }
 
 void CUsbStrageKeybordLockDlg::UpdateUsbControls(bool needReboot)
@@ -244,7 +264,7 @@ LRESULT CUsbStrageKeybordLockDlg::WindowProc(UINT message, WPARAM wParam, LPARAM
 	// TODO: ここに特定なコードを追加するか、もしくは基本クラスを呼び出してください。
 	if (message == WM_DEVICECHANGE)
 	{
-		//FuncDeviceChangeMessage(wParam, lParam);
+		FuncDeviceChangeMessage(wParam, lParam);
 	}
 
 	return CDialogEx::WindowProc(message, wParam, lParam);
@@ -252,13 +272,14 @@ LRESULT CUsbStrageKeybordLockDlg::WindowProc(UINT message, WPARAM wParam, LPARAM
 
 void CUsbStrageKeybordLockDlg::FuncDeviceChangeMessage(WPARAM wp, LPARAM lp)
 {
+	if (!this->mUsbLocking) { return; }
 	if (wp != DBT_DEVICEARRIVAL) { return; }
 
 	DEV_BROADCAST_HDR* hdr = (DEV_BROADCAST_HDR*)lp;
 	if (hdr->dbch_devicetype != DBT_DEVTYP_VOLUME) { return; }
 
-	DEV_BROADCAST_VOLUME* volInfo = (DEV_BROADCAST_VOLUME*)lp;
-	if ((volInfo->dbcv_flags & DBTF_MEDIA) == 0) { return; }
+	//DEV_BROADCAST_VOLUME* volInfo = (DEV_BROADCAST_VOLUME*)lp;
+	//if ((volInfo->dbcv_flags & DBTF_MEDIA) == 0) { return; }
 
 	bool needRestart;
 //	this->mUsbDisabler.DisableDevice(devif->dbcc_classguid, &needRestart);
@@ -266,14 +287,3 @@ void CUsbStrageKeybordLockDlg::FuncDeviceChangeMessage(WPARAM wp, LPARAM lp)
 	this->UpdateUsbControls(needRestart);
 }
 
-
-void CUsbStrageKeybordLockDlg::OnDevModeChange(LPTSTR lpDeviceName)
-{
-	CDialogEx::OnDevModeChange(lpDeviceName);
-
-	// TODO: ここにメッセージ ハンドラー コードを追加します。
-	bool needRestart;
-//	this->mUsbDisabler.DisableDevice(devif->dbcc_classguid, &needRestart);
-	this->mUsbDisabler.DisablePresentDevice(&needRestart);
-	this->UpdateUsbControls(needRestart);
-}

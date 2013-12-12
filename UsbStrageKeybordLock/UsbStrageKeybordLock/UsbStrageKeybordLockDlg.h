@@ -48,15 +48,17 @@ private:
 	CBrush		mBrushRed;
 	CKeyboardDisabler	mKeyDisabler;
 	CUsbStrageDisabler	mUsbDisabler;
+	bool		mUsbLocking;
 
 	void UpdateKeybordLockState();
 	void UpdateUsbLockState();
 	void UpdateLockState(int targetControlId, bool locked);
+	void UpdateUsbHasLockState();
 	void UpdateUsbControls(bool needReboot);
 	void FuncDeviceChangeMessage(WPARAM wp, LPARAM lp);
 	
 public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
-	afx_msg void OnDevModeChange(LPTSTR lpDeviceName);
+//	afx_msg void OnDevModeChange(LPTSTR lpDeviceName);
 };
